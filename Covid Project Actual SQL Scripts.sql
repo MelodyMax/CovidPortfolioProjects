@@ -1,5 +1,5 @@
 
---Original Code
+-- Analyzing the CovidDeaths and CovidVaccinations Data 
 
 Select *
 From PortfolioProject..CovidDeaths
@@ -147,9 +147,9 @@ Join PortfolioProject..CovidVaccinations vac
 	and dea.date = vac.date
 Where dea.continent is not null
 
----New Code for Tableau Visualization
+---New Queries for Tableau Visualization
 
---1.
+--1. Global Numbers
 
 Select SUM(new_cases) as total_cases, SUM(cast(new_deaths as int)) as total_deaths, SUM(cast(new_deaths as int))/SUM(new_cases)*100
 	as DeathPercentage
@@ -157,7 +157,7 @@ From PortfolioProject..CovidDeaths
 Where continent is not null
 Order by 1,2
 
---2.
+--2. TotalDeathCount Per Continent
 
 Select location, SUM(cast(new_deaths as int)) as TotalDeathCount
 From PortfolioProject..CovidDeaths
@@ -166,41 +166,49 @@ Where continent is null
 Group by location
 Order by TotalDeathCount desc
 
---3. 
+--3. Infection Count and Percentage by Country
 
 Select location, population, MAX(total_cases) as HighestInfectionCount, MAX((total_cases/population) * 100) as 
 	PercentPopulationInfected
 From PortfolioProject..CovidDeaths
---Where location = 'United States'
 Group by location, population
 Order by PercentPopulationInfected desc
 
---4.
+--4. Date, Infection Count and Pecentage by Country
 
 Select location, population, date, MAX(total_cases) as HighestInfectionCount, MAX((total_cases/population) * 100) as 
 	PercentPopulationInfected
 From PortfolioProject..CovidDeaths
---Where location = 'United States'
 Group by location, population, date
 Order by PercentPopulationInfected desc
 
---5. United States Total Cases and Death Percentage
+-- UNITED STATES DATA
 
-Select location, date, total_cases, total_deaths, (total_deaths/total_cases) * 100 as DeathPercentage
+--5. Total Cases and Death Percentage
+
+Select date, total_cases, total_deaths, (total_deaths/total_cases) * 100 as DeathPercentage
+From PortfolioProject..CovidDeaths
+Where location = 'United States'
+Order by 1
+
+--Extras for vizualization same as above
+
+Select SUM(new_cases) as total_cases, SUM(cast(new_deaths as int)) as total_deaths, SUM(cast(new_deaths as int))/SUM(new_cases)*100
+	as DeathPercentage
 From PortfolioProject..CovidDeaths
 Where location = 'United States'
 Order by 1,2
 
--- United States Positive Rate Vs Total Vaccinations 
+--6. United States Positive Rate Vs Total Vaccinations 
 
-Select location, date,positive_rate, new_vaccinations, total_vaccinations
+Select date,positive_rate, new_vaccinations, total_vaccinations
 From PortfolioProject..CovidVaccinations
 Where location = 'United States'
-Order by 1,2
+Order by 1
 
--- Unites States Vaccination vs Death Percentage
+--7. Unites States Vaccination vs Death Percentage
 
-Select dea.location, dea.date, dea.population, 
+Select dea.date, dea.population, 
 	vac.people_fully_vaccinated, 
 	(dea.new_deaths/dea.new_cases)* 100 as DeathPercentage
 From PortfolioProject..CovidDeaths dea
@@ -208,11 +216,11 @@ Join PortfolioProject..CovidVaccinations vac
 	On dea.location = vac.location
 	and dea.date = vac.date
 Where dea.location = 'United States'
-Order by 1, 2
+Order by 1
 
--- United States Vaccinations vs Number of Hospitalization and ICU
+--8.  United States Vaccinations vs Number of Hospitalization and ICU
 
-Select dea.location, dea.date, dea.new_cases,
+Select dea.date, dea.new_cases,
 	dea.icu_patients, dea.hosp_patients,
 	(vac.people_fully_vaccinated/dea.population)*100 as PercentageFullyVaccinated,
 	vac.new_vaccinations
@@ -221,17 +229,18 @@ Join PortfolioProject..CovidVaccinations vac
 	On dea.location = vac.location
 	and dea.date = vac.date
 Where dea.location = 'United States'
-Order by 1, 2
+Order by 1
 
 
---United States Covid Summary (Vaccinations, Death Percentage, Hospitalization)
+-- 10. United States Covid Summary (Vaccinations, Death Percentage, Hospitalization)
 
 Select dea.location, dea.date, dea.new_cases,
 	(dea.new_cases/dea.population)*100 as PercentageInfection,
 	dea.icu_patients, dea.hosp_patients,
 	(dea.new_deaths/dea.new_cases)* 100 as DeathPercentage,
 	(vac.people_fully_vaccinated/dea.population)*100 as PercentageFullyVaccinated,
-	vac.new_vaccinations
+	vac.new_vaccinations,
+	vac.people_fully_vaccinated
 From PortfolioProject..CovidDeaths dea
 Join PortfolioProject..CovidVaccinations vac
 	On dea.location = vac.location
