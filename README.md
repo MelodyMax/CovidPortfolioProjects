@@ -1,3 +1,3 @@
-# CovidPortfolioProject
+# PortfolioProject
 
-This repository has all the code and queries I wrote to create my Covid19 Portfolio Porject in Tableau. Please feel free to comment and I appreciate all your feedbacks.
+This repository has all the code and SQL queries for both of my Covid19 Analysis and Data Cleaning in SQL Project. Please feel free to comment and I appreciate all your feedbacks.
