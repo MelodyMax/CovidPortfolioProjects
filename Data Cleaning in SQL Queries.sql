@@ -60,7 +60,7 @@ JOIN PortfolioProject..NashvilleHousing b
 	AND a.[UniqueID ] <> b.[UniqueID ]
 Where a.PropertyAddress is null
 
--- Breaking up Address into Individual Columns (Street, City, State) using SUBSTRING
+-- Breaking up PropertyAddress into Individual Columns (Street, City) using SUBSTRING
 
 Select PropertyAddress
 From PortfolioProject..NashvilleHousing
@@ -83,11 +83,74 @@ Update NashvilleHousing
 SET PropertySplitStreet = SUBSTRING(PropertyAddress, 1, CHARINDEX(',', PropertyAddress) - 1)
 
 ALTER TABLE NashvilleHousing
-Add  PropertySplitCity Nvarchar(255)
+Add PropertySplitCity Nvarchar(255)
 
--- Checking if the columns are properly added
+Update NashvilleHousing
+SET PropertySplitCity = SUBSTRING(PropertyAddress, CHARINDEX(',', PropertyAddress) + 1 ,LEN(PropertyAddress))
+
+
+-- Now, let's break up OwnerAddress into Individual Columns (Street, City, State) using PARSENAME
+
+Select OwnerAddress
+From PortfolioProject..NashvilleHousing
+
+-- With PARSENAME, you can only use a period as the delimiter to split on.
+-- I replaced the comma with a period.
+
+Select 
+PARSENAME(REPLACE(OwnerAddress,',', '.'), 3),
+PARSENAME(REPLACE(OwnerAddress,',', '.'), 2),
+PARSENAME(REPLACE(OwnerAddress,',', '.'), 1)
+From PortfolioProject..NashvilleHousing
+
+-- Adding the 3 new columns to the table
+
+ALTER TABLE NashvilleHousing
+Add OwnerSplitStreet Nvarchar(255)
+
+Update NashvilleHousing
+SET OwnerSplitStreet = PARSENAME(REPLACE(OwnerAddress,',', '.'), 3)
+
+ALTER TABLE NashvilleHousing
+Add OwnerSplitCity Nvarchar(255)
+
+Update NashvilleHousing
+SET OwnerSplitCity = PARSENAME(REPLACE(OwnerAddress,',', '.'), 2)
+
+ALTER TABLE NashvilleHousing
+Add OwnerSplitState Nvarchar(255)
+
+Update NashvilleHousing
+SET OwnerSplitState = PARSENAME(REPLACE(OwnerAddress,',', '.'), 1)
+
+-- Checking if all the columns were properly added
 
 Select *
 From PortfolioProject..NashvilleHousing
 
+-- Change Y and N to Yes or No in "Sold as Vacant" Field
+
+Select Distinct(SoldAsVacant), Count(SoldASVacant)
+From PortfolioProject..NashvilleHousing
+Group by SoldAsVacant
+Order by 2 desc
+
+-- Using a case statement
+
+Select SoldAsVacant,
+CASE 
+	When SoldAsVacant = 'Y' THEN 'Yes'
+	When SoldAsVacant = 'N' THEN 'No'
+	Else SoldAsVacant
+END
+From PortfolioProject..NashvilleHousing
+
+-- Updating the table with the changes I made
+
+Update NashvilleHousing
+SET SoldAsVacant = CASE 
+	When SoldAsVacant = 'Y' THEN 'Yes'
+	When SoldAsVacant = 'N' THEN 'No'
+	Else SoldAsVacant
+END
 
