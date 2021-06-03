@@ -154,3 +154,50 @@ SET SoldAsVacant = CASE
 	Else SoldAsVacant
 END
 
+-- Figuring out Duplicates using ROW_NUM and CTE
+
+WITH RowNumCTE AS (
+Select *, 
+	ROW_NUMBER () OVER (
+	PARTITION BY ParcelID,
+				 PropertyAddress, 
+				 SalePrice,
+				 SaleDate,
+				 LegalReference
+	ORDER BY UniqueID) row_num
+
+From PortfolioProject..NashvilleHousing
+)
+
+Select *
+From RowNumCTE
+WHERE row_num >1
+Order by PropertyAddress
+
+-- Removing Duplicates
+
+WITH RowNumCTE AS (
+Select *, 
+	ROW_NUMBER () OVER (
+	PARTITION BY ParcelID,
+				 PropertyAddress, 
+				 SalePrice,
+				 SaleDate,
+				 LegalReference
+	ORDER BY UniqueID) row_num
+
+From PortfolioProject..NashvilleHousing
+)
+
+DELETE
+From RowNumCTE
+WHERE row_num >1
+
+-- Dropping Unused Columns
+
+Select *
+From PortfolioProject..NashvilleHousing
+
+ALTER TABLE NashvilleHousing
+DROP COLUMN OwnerAddress, PropertyAddress, TaxDistrict, SaleDate
+
