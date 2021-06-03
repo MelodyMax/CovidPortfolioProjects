@@ -174,7 +174,7 @@ From RowNumCTE
 WHERE row_num >1
 Order by PropertyAddress
 
--- Removing Duplicates
+-- Removing Duplicates from the table
 
 WITH RowNumCTE AS (
 Select *, 
@@ -193,11 +193,12 @@ DELETE
 From RowNumCTE
 WHERE row_num >1
 
--- Dropping Unused Columns
+-- Deleting Unused Columns
 
 Select *
 From PortfolioProject..NashvilleHousing
 
 ALTER TABLE NashvilleHousing
 DROP COLUMN OwnerAddress, PropertyAddress, TaxDistrict, SaleDate
+
 
